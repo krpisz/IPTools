@@ -36,6 +36,7 @@ class RangeTest extends \PHPUnit_Framework_TestCase
      */
     public function testContains($data, $find, $expected)
     {
+        $this->assertEquals($expected, Range::parse($data)->contains($find));
         $this->assertEquals($expected, Range::parse($data)->contains(new IP($find)));
     }
 
@@ -57,6 +58,13 @@ class RangeTest extends \PHPUnit_Framework_TestCase
     public function testCount($data, $expected)
     {
         $this->assertEquals($expected, count(Range::parse($data)));
+    }
+
+    /**
+     * @expectedException \Brick\Math\Exception\ArithmeticException
+     */
+    public function testCountException() {
+        count(Range::parse('::/0'));
     }
 
     public function getTestParseData()

@@ -1,5 +1,8 @@
 <?php
+
 namespace IPTools;
+use Brick\Math\BigInteger;
+use Brick\Math\Exception\ArithmeticException;
 
 /**
  * @author Safarov Alisher <alisher.safarov@outlook.com>
@@ -75,7 +78,7 @@ class Range implements \Iterator, \Countable
 			$within = (strcmp($find->getFirstIP()->inAddr(), $this->firstIP->inAddr()) >= 0)
 				&& (strcmp($find->getLastIP()->inAddr(), $this->lastIP->inAddr()) <= 0);
 		} else {
-			throw new \Exception('Invalid type');
+            $within = $this->contains(self::parse($find));
 		}
 
 		return $within;
@@ -187,6 +190,16 @@ class Range implements \Iterator, \Countable
 		return new Network($ip, Network::prefix2netmask($prefixLength, $ip->getVersion()));
 	}
 
+    /**
+     * @return BigInteger
+     */
+    public function getRangeSize()
+    {
+        return BigInteger::of($this->lastIP->toLong())
+            ->minus($this->firstIP->toLong())
+            ->plus(1);
+    }
+
 	/**
 	 * @return IP
 	 */
@@ -223,10 +236,11 @@ class Range implements \Iterator, \Countable
 
 	/**
 	 * @return int
+     * @throws ArithmeticException
 	 */
 	public function count()
 	{
-		return (integer)bcadd(bcsub($this->lastIP->toLong(), $this->firstIP->toLong()), 1);
+        return $this->getRangeSize()->toInteger();
 	}
 
 }

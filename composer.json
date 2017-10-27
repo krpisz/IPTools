@@ -11,7 +11,7 @@
     }],
     "require": {
         "php": ">=5.4.0",
-        "ext-bcmath": "*"
+        "brick/math": "^0.5"
     },
     "require-dev": {
         "satooshi/php-coveralls": "~1.0"

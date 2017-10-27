@@ -1,5 +1,8 @@
 <?php
+
 namespace IPTools;
+use Brick\Math\BigInteger;
+use Brick\Math\Exception\ArithmeticException;
 
 /**
  * @author Safarov Alisher <alisher.safarov@outlook.com>
@@ -209,7 +212,7 @@ class Network implements \Iterator, \Countable
 	}
 
 	/**
-	 * @return int|string
+	 * @return BigInteger
 	 */
 	public function getBlockSize()
 	{
@@ -217,10 +220,10 @@ class Network implements \Iterator, \Countable
 		$prefixLength = $this->getPrefixLength();
 
 		if ($this->ip->getVersion() === IP::IP_V6) {
-			return bcpow('2', (string)($maxPrefixLength - $prefixLength));
+            return BigInteger::of(2)->power($maxPrefixLength - $prefixLength);
 		}
 
-		return pow(2, $maxPrefixLength - $prefixLength);
+		return BigInteger::of(2)->power($maxPrefixLength - $prefixLength);
 	}
 
 	/**
@@ -232,7 +235,7 @@ class Network implements \Iterator, \Countable
 		$lastHost = $this->getBroadcast();
 
 		if ($this->ip->getVersion() === IP::IP_V4) {
-			if ($this->getBlockSize() > 2) {
+			if ($this->getBlockSize()->isGreaterThan(2)) {
 				$firstHost = IP::parseBin(substr($firstHost->toBin(), 0, $firstHost->getMaxPrefixLength() - 1) . '1');
 				$lastHost  = IP::parseBin(substr($lastHost->toBin(), 0, $lastHost->getMaxPrefixLength() - 1) . '0');
 			}
@@ -353,10 +356,11 @@ class Network implements \Iterator, \Countable
 
 	/**
 	* @return int
+    * @throws ArithmeticException
 	*/
 	public function count()
 	{
-		return (integer)$this->getBlockSize();
+		return $this->getBlockSize()->toInteger();
 	}
 
 }

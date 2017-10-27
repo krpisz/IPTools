@@ -156,6 +156,13 @@ class NetworkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, count(Network::parse($data)));
     }
 
+    /**
+     * @expectedException \Brick\Math\Exception\ArithmeticException
+     */
+    public function testCountException() {
+        count(Network::parse('::/0'));
+    }
+
     public function getTestParseData()
     {
         return array(

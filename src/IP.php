@@ -1,5 +1,6 @@
 <?php
 namespace IPTools;
+use Brick\Math\BigInteger;
 
 /**
  * @author Safarov Alisher <alisher.safarov@outlook.com>
@@ -106,8 +107,8 @@ class IP
 		} else {
 			$binary = array();
 			for ($i = 0; $i < self::IP_V6_OCTETS; $i++) {
-				$binary[] = bcmod($longIP, 256);
-				$longIP = bcdiv($longIP, 256, 0);
+			    list($longIP, $re) = BigInteger::of($longIP)->quotientAndRemainder(256);
+				$binary[] = $re->toInteger();
 			}
 			$ip = new self(inet_ntop(call_user_func_array('pack', array_merge(array('C*'), array_reverse($binary)))));
 		}
@@ -219,7 +220,7 @@ class IP
 		} else {
 			$octet = self::IP_V6_OCTETS - 1;
 			foreach ($chars = unpack('C*', $this->in_addr) as $char) {
-				$long = bcadd($long, bcmul($char, bcpow(256, $octet--)));
+				$long = BigInteger::of(256)->power($octet--)->multipliedBy($char)->plus($long);
 			}
 		}
 
