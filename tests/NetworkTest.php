@@ -51,6 +51,15 @@ class NetworkTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider getTestParseWrongNetworkData
+     * @expectedException Exception
+     */
+    public function testParseWrongNetworkException($data)
+    {
+        Network::parse($data);
+    }
+
+    /**
      * @dataProvider getPrefixData
      */
     public function testPrefix2Mask($prefix, $version, $mask)
@@ -170,6 +179,17 @@ class NetworkTest extends \PHPUnit_Framework_TestCase
             array('2001::2001:2001/32', '2001::/32'),
             array('127.168.0.1 255.255.255.255', '127.168.0.1/32'),
             array('1234::1234', '1234::1234/128'),
+            array('192.168.0.54/255.255.255.224', '192.168.0.32/27'),
+        );
+    }
+
+    public function getTestParseWrongNetworkData()
+    {
+        return array(
+            array('192.168.0.54/128'),
+            array('192.168.0.54/24.5'),
+            array('192.168.0.54/24 asd'),
+            array('1234::1234/255.255.255.0')
         );
     }
 

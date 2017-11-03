@@ -50,9 +50,11 @@ class Network implements \Iterator, \Countable
 	 */
 	public static function parse($data)
 	{
-		if (preg_match('~^(.+?)/(\d+)$~', $data, $matches)) {
+		if (preg_match('~^(.+?)/([0-9A-F.:]+)$~i', $data, $matches)) {
 			$ip      = IP::parse($matches[1]);
-			$netmask = self::prefix2netmask((int)$matches[2], $ip->getVersion());
+			$netmask = ctype_digit($matches[2]) ?
+                self::prefix2netmask((int)$matches[2], $ip->getVersion())
+                : IP::parse($matches[2]);
 		} elseif (strpos($data,' ')) {
 			list($ip, $netmask) = explode(' ', $data, 2);
 			$ip      = IP::parse($ip);
