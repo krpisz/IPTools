@@ -74,6 +74,7 @@ class RangeTest extends \PHPUnit_Framework_TestCase
             array('127.0.0.1/24', array('127.0.0.0', '127.0.0.255')),
             array('127.*.0.0', array('127.0.0.0', '127.255.0.0')),
             array('127.255.255.0', array('127.255.255.0', '127.255.255.0')),
+            array('2400:cb00::/32', array('2400:cb00::', '2400:cb00:ffff:ffff:ffff:ffff:ffff:ffff')),
         );
     }
 

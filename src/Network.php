@@ -162,7 +162,7 @@ class Network implements \Iterator, \Countable
 	 */
 	public function getNetwork()
 	{
-		return new IP(inet_ntop($this->getIP()->inAddr() & $this->getNetmask()->inAddr()));
+		return new IP(IP::_inet_ntop($this->getIP()->inAddr() & $this->getNetmask()->inAddr()));
 	}
 
 	/**
@@ -186,7 +186,7 @@ class Network implements \Iterator, \Countable
 	 */
 	public function getWildcard()
 	{
-		return new IP(inet_ntop(~$this->getNetmask()->inAddr()));
+		return new IP(IP::_inet_ntop(~$this->getNetmask()->inAddr()));
 	}
 
 	/**
@@ -194,7 +194,7 @@ class Network implements \Iterator, \Countable
 	 */
 	public function getBroadcast()
 	{
-		return new IP(inet_ntop($this->getNetwork()->inAddr() | ~$this->getNetmask()->inAddr()));
+		return new IP(IP::_inet_ntop($this->getNetwork()->inAddr() | ~$this->getNetmask()->inAddr()));
 	}
 
 	/**

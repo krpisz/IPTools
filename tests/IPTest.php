@@ -115,6 +115,70 @@ class IPTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider getTestInetPton
+     */
+    public function testInetPton($address)
+    {
+        $this->assertEquals(inet_pton($address),
+            IP::_inet_pton($address));
+    }
+
+    public function getTestInetPton()
+    {
+        return [
+            ['2008:707:2fa6:0775:44:1003:2:ffff'],
+            ['::ffff:128.64.32.16'],
+            ['::ffff:8040:2010'],
+            ['2008::0:0001'],
+            ['ffff::'],
+            ['::'],
+            ['192.168.2.1']
+        ];
+    }
+
+    /**
+     * @dataProvider getTestInetPtonWarning
+     * @expectedException PHPUnit_Framework_Error_Warning
+     */
+    public function testInetPtonWarning($address)
+    {
+        IP::_inet_pton($address);
+    }
+
+    public function getTestInetPtonWarning()
+    {
+        return [
+            ['64.32.502.1'],
+            ['64.32.'],
+            ['::ffff:64.32.'],
+            ['::ffff::'],
+        ];
+    }
+
+    /**
+     * @dataProvider getTestInetNtop
+     */
+    public function testInetNtop($address)
+    {
+        $in_addr = inet_pton($address);
+        $this->assertEquals(inet_ntop($in_addr),
+            IP::_inet_ntop($in_addr));
+    }
+
+    public function getTestInetNtop()
+    {
+        return [
+            ['2008:707:2fa6:0775:44:1003:2:ffff'],
+            ['2008:fa90::128.64.32.16'],
+            ['::ffff:8040:2010'],
+            ['2008::0:0001'],
+            ['ffff::'],
+            ['::'],
+            ['192.168.2.1']
+        ];
+    }
+
+    /**
      * @dataProvider getTestNextData
      */
     public function testNext($ip, $step, $expected)
