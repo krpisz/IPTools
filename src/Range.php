@@ -36,13 +36,24 @@ class Range implements \Iterator, \Countable
 		$this->setLastIP($lastIP);
 	}
 
+    /**
+     *
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->getFirstIP().'-'.$this->getLastIP();
+    }
+
 	/**
 	 * @param string $data
 	 * @return Range
 	 */
 	public static function parse($data)
 	{
-		if (strpos($data,'/') || strpos($data,' ')) {
+		if($data instanceof Range){
+		    return clone $data;
+        } elseif (strpos($data,'/') || strpos($data,' ')) {
 			$network = Network::parse($data);
 			$firstIP = $network->getFirstIP();
 			$lastIP  = $network->getLastIP();
@@ -126,9 +137,10 @@ class Range implements \Iterator, \Countable
 		return $this->lastIP;
 	}
 
-	/**
-	 * @return array
-	 */
+    /**
+     * @return array
+     * @throws \Exception
+     */
 	public function getNetworks()
 	{
 		$span = $this->getSpanNetwork();
@@ -176,6 +188,7 @@ class Range implements \Iterator, \Countable
 
 	/**
 	 * @return Network
+     * @throws \Exception
 	 */
 	public function getSpanNetwork()
 	{
@@ -191,6 +204,51 @@ class Range implements \Iterator, \Countable
 	}
 
     /**
+     * Exclude range of IP from
+     *
+     * @param $exclude
+     * @return Range[]
+     * @throws \Exception
+     */
+	public function exclude($exclude){
+        $ranges = [clone $this];
+
+        foreach ((array) $exclude as $excludeRng) {
+            $excludeRng = self::parse($excludeRng);
+
+            foreach ($ranges as $k => $range) {
+                /** @var $range Range */
+
+                if ( $range->contains($excludeRng)){
+                    if(strcmp($excludeRng->getLastIP()->next()->inAddr(), $range->getLastIP()->inAddr()) <= 0){
+                        $ranges[] = new Range($excludeRng->getLastIP()->next(), $range->getLastIP());
+                    }
+
+                    if(strcmp($range->getFirstIP()->inAddr(), $excludeRng->getFirstIP()->prev(1)->inAddr()) <= 0){
+                        $range->setLastIP($excludeRng->getFirstIP()->prev(1));
+                    }else{
+                        unset($ranges[$k]);
+                    }
+                }elseif ($range->contains($excludeRng->getFirstIP())) {
+                    $trimIp = $excludeRng->getFirstIP()->prev(1);
+                    if ($range->contains($trimIp))
+                        $range->setLastIP($trimIp);
+
+                } elseif ($range->contains($excludeRng->getLastIP())) {
+                    $trimIp = $excludeRng->getLastIP()->next(1);
+                    if ($range->contains($trimIp))
+                        $range->setFirstIP($trimIp);
+
+                } elseif ($excludeRng->contains($range)){
+                    unset($ranges[$k]);
+                }
+            }
+        }
+
+        return $ranges;
+    }
+
+    /**
      * @return BigInteger
      */
     public function getRangeSize()
@@ -200,9 +258,10 @@ class Range implements \Iterator, \Countable
             ->plus(1);
     }
 
-	/**
-	 * @return IP
-	 */
+    /**
+     * @return IP
+     * @throws \Exception
+     */
 	public function current()
 	{
 		return $this->firstIP->next($this->position);
@@ -226,9 +285,10 @@ class Range implements \Iterator, \Countable
 		$this->position = 0;
 	}
 
-	/**
-	 * @return bool
-	 */
+    /**
+     * @return bool
+     * @throws \Exception
+     */
 	public function valid()
 	{
 		return strcmp($this->firstIP->next($this->position)->inAddr(), $this->lastIP->inAddr()) <= 0;

@@ -67,6 +67,20 @@ class RangeTest extends \PHPUnit_Framework_TestCase
         count(Range::parse('::/0'));
     }
 
+    /**
+     * @dataProvider getExcludeData
+     */
+    public function testExclude($data, $exclude, $expected)
+    {
+        $result = array();
+
+        foreach(Range::parse($data)->exclude($exclude) as $network) {
+            $result[] = (string)$network;
+        }
+
+        $this->assertEquals($expected, $result);
+    }
+
     public function getTestParseData()
     {
         return array(
@@ -75,6 +89,7 @@ class RangeTest extends \PHPUnit_Framework_TestCase
             array('127.*.0.0', array('127.0.0.0', '127.255.0.0')),
             array('127.255.255.0', array('127.255.255.0', '127.255.255.0')),
             array('2400:cb00::/32', array('2400:cb00::', '2400:cb00:ffff:ffff:ffff:ffff:ffff:ffff')),
+            array(new Range(new IP('127.0.0.0'), new IP('127.255.0.0')), array('127.0.0.0', '127.255.0.0')),
         );
     }
 
@@ -149,6 +164,29 @@ class RangeTest extends \PHPUnit_Framework_TestCase
         return array(
             array('127.0.0.0/31', 2),
             array('2001:db8::/120', 256),
+        );
+    }
+
+    public function getExcludeData()
+    {
+        return array(
+            array('192.0.2.0-192.0.2.100', '192.0.2.10-192.0.2.20',
+                array(
+                    '192.0.2.0-192.0.2.9',
+                    '192.0.2.21-192.0.2.100'
+                )
+            ),
+            array('192.0.2.16/28', ['192.0.2.20-192.0.2.40', '192.0.2.8-192.0.2.18'],
+                array(
+                    '192.0.2.19-192.0.2.19'
+                )
+            ),
+            array('192.0.2.16/28', '192.0.2.16',
+                array('192.0.2.17-192.0.2.31')
+            ),
+            array('192.0.2.16/28', '192.0.2.0-192.0.2.32',
+                array()
+            ),
         );
     }
 

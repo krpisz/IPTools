@@ -25,10 +25,11 @@ class Network implements \Iterator, \Countable
 	 */
 	private $position = 0;
 
-	/**
-	 * @param IP $ip
-	 * @param IP $netmask
-	 */
+    /**
+     * @param IP $ip
+     * @param IP $netmask
+     * @throws \Exception
+     */
 	public function __construct(IP $ip, IP $netmask)
 	{
 		$this->setIP($ip);
@@ -44,13 +45,16 @@ class Network implements \Iterator, \Countable
 		return $this->getCIDR();
 	}
 
-	/**
-	 * @param string $data
-	 * @return Network
-	 */
+    /**
+     * @param string $data
+     * @return Network
+     * @throws \Exception
+     */
 	public static function parse($data)
 	{
-		if (preg_match('~^(.+?)/([0-9A-F.:]+)$~i', $data, $matches)) {
+		if($data instanceof Network){
+		    return clone $data;
+        } elseif (preg_match('~^(.+?)/([0-9A-F.:]+)$~i', $data, $matches)) {
 			$ip      = IP::parse($matches[1]);
 			$netmask = ctype_digit($matches[2]) ?
                 self::prefix2netmask((int)$matches[2], $ip->getVersion())
@@ -133,9 +137,10 @@ class Network implements \Iterator, \Countable
 		$this->netmask = $ip;
 	}
 
-	/**
-	 * @param int $prefixLength
-	 */
+    /**
+     * @param int $prefixLength
+     * @throws \Exception
+     */
 	public function setPrefixLength($prefixLength)
 	{
 		$this->setNetmask(self::prefix2netmask((int)$prefixLength, $this->ip->getVersion()));
@@ -228,9 +233,10 @@ class Network implements \Iterator, \Countable
 		return BigInteger::of(2)->power($maxPrefixLength - $prefixLength);
 	}
 
-	/**
-	 * @return Range
-	 */
+    /**
+     * @return Range
+     * @throws \Exception
+     */
 	public function getHosts()
 	{
 		$firstHost = $this->getNetwork();
@@ -322,9 +328,10 @@ class Network implements \Iterator, \Countable
 		return $networks;
 	}
 
-	/**
-	* @return IP
-	*/
+    /**
+     * @return IP
+     * @throws \Exception
+     */
 	public function current()
 	{
 		return $this->getFirstIP()->next($this->position);
@@ -348,9 +355,10 @@ class Network implements \Iterator, \Countable
 		$this->position = 0;
 	}
 
-	/**
-	* @return bool
-	*/
+    /**
+     * @return bool
+     * @throws \Exception
+     */
 	public function valid()
 	{
 		return strcmp($this->getFirstIP()->next($this->position)->inAddr(), $this->getLastIP()->inAddr()) <= 0;
