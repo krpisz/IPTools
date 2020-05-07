@@ -24,6 +24,10 @@ class Range implements \Iterator, \Countable
 	 * @var int
 	 */
 	private $position = 0;
+    /**
+     * @var IP
+     */
+    private $current;
 
 	/**
 	 * @param IP $firstIP
@@ -278,11 +282,13 @@ class Range implements \Iterator, \Countable
 	public function next()
 	{
 		++$this->position;
+        $this->current = $this->current->next();
 	}
 
 	public function rewind()
 	{
 		$this->position = 0;
+        $this->current = $this->getFirstIP();
 	}
 
     /**
@@ -291,7 +297,7 @@ class Range implements \Iterator, \Countable
      */
 	public function valid()
 	{
-		return strcmp($this->firstIP->next($this->position)->inAddr(), $this->lastIP->inAddr()) <= 0;
+		return strcmp($this->current->inAddr(), $this->lastIP->inAddr()) <= 0;
 	}
 
 	/**

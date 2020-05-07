@@ -24,6 +24,10 @@ class Network implements \Iterator, \Countable
 	 * @var int
 	 */
 	private $position = 0;
+    /**
+     * @var IP
+     */
+    private $current;
 
     /**
      * @param IP $ip
@@ -348,11 +352,13 @@ class Network implements \Iterator, \Countable
 	public function next()
 	{
 		++$this->position;
+        $this->current = $this->current->next();
 	}
 
 	public function rewind()
 	{
 		$this->position = 0;
+        $this->current = $this->getFirstIP();
 	}
 
     /**
@@ -361,7 +367,7 @@ class Network implements \Iterator, \Countable
      */
 	public function valid()
 	{
-		return strcmp($this->getFirstIP()->next($this->position)->inAddr(), $this->getLastIP()->inAddr()) <= 0;
+		return strcmp($this->current->inAddr(), $this->getLastIP()->inAddr()) <= 0;
 	}
 
 	/**
